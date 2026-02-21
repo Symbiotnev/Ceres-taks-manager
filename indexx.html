@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>Project Ceres — Imfuyo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f1;
+  --surface: #ffffff;
+  --surface2: #faf9f7;
+  --border: #e4e1da;
+  --border-light: #edeae4;
+  --text: #0f0f0e;
+  --text-muted: #6b6860;
+  --text-light: #aeaba4;
+  --tag-url-bg: #eaf0fd; --tag-url-fg: #1a56c4;
+  --tag-note-bg: #fdf6e3; --tag-note-fg: #92650a;
+  --tag-task-bg: #edfaf3; --tag-task-fg: #136c3e;
+  --tag-rem-bg: #f3f0fd;  --tag-rem-fg: #6d28d9;
+  --radius: 14px; --radius-sm: 9px; --radius-xs: 6px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow: 0 2px 6px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.05);
+  --sidebar-w: 256px; --nav-h: 60px;
+  --font: 'Archivo', sans-serif;
+  --font-serif: 'Playfair Display', serif;
+}
+html { color-scheme: light only; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg) !important; color: var(--text) !important; }
+body { font-family: var(--font); font-size: 14px; line-height: 1.55; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* ── AUTH ── */
+#auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
+.auth-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: 20px; padding: 44px 40px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lg); }
+.auth-logos { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+.auth-logos img { height: 34px; object-fit: contain; }
+.auth-logo-sep { width: 1px; height: 26px; background: var(--border); }
+.auth-title { font-family: var(--font-serif); font-size: 24px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+.auth-sub { color: var(--text-muted); font-size: 13px; margin-bottom: 28px; }
+.auth-error { font-size: 12.5px; color: #c0392b; margin-top: 10px; text-align: center; min-height: 18px; }
+
+/* ── FORM ── */
+.ff { margin-bottom: 14px; }
+.ff label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.ff input, .ff select, .ff textarea { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s, box-shadow 0.15s; resize: vertical; }
+.ff input:focus, .ff select:focus, .ff textarea:focus { border-color: var(--text); box-shadow: 0 0 0 3px rgba(15,15,14,0.06); }
+.ff select { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6860' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+.btn-primary { width: 100%; padding: 12px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.2px; transition: opacity 0.15s, transform 0.1s; margin-top: 6px; }
+.btn-primary:hover { opacity: 0.82; }
+.btn-primary:active { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── TOPNAV ── */
+#app { display: none; min-height: 100vh; }
+.topnav { position: fixed; top: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(255,255,255,0.95); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 200; gap: 12px; }
+.nav-left { display: flex; align-items: center; gap: 14px; }
+.nav-logos { display: flex; align-items: center; gap: 10px; }
+.nav-logos img { height: 26px; object-fit: contain; }
+.nav-sep { width: 1px; height: 18px; background: var(--border); }
+.nav-brand { font-family: var(--font-serif); font-size: 16px; font-weight: 500; letter-spacing: -0.2px; white-space: nowrap; }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-user { display: flex; align-items: center; gap: 8px; }
+.nav-email { font-size: 13px; color: var(--text-muted); }
+
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--text); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0; }
+
+.icon-btn { width: 34px; height: 34px; border: 1px solid var(--border); border-radius: var(--radius-xs); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: background 0.12s, color 0.12s; }
+.icon-btn:hover { background: var(--border-light); color: var(--text); }
+.hamburger { display: none; }
+
+/* ── LAYOUT ── */
+.layout { display: flex; padding-top: var(--nav-h); min-height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar { width: var(--sidebar-w); position: fixed; top: var(--nav-h); bottom: 0; left: 0; background: var(--surface); border-right: 1px solid var(--border-light); overflow-y: auto; padding: 16px 10px 24px; z-index: 150; transition: transform 0.24s cubic-bezier(0.4,0,0.2,1); }
+.sb-group { margin-bottom: 20px; }
+.sb-group-label { font-size: 10px; font-weight: 700; letter-spacing: 0.9px; text-transform: uppercase; color: var(--text-light); padding: 0 8px; margin-bottom: 4px; }
+.sb-btn { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px; border-radius: var(--radius-xs); border: none; background: none; font-family: var(--font); font-size: 13.5px; color: var(--text-muted); cursor: pointer; text-align: left; transition: background 0.12s, color 0.12s; }
+.sb-btn:hover { background: var(--border-light); color: var(--text); }
+.sb-btn.active { background: var(--text); color: #fff; }
+.sb-btn .sb-count { margin-left: auto; font-size: 10.5px; padding: 1px 7px; border-radius: 20px; background: rgba(255,255,255,0.18); opacity: 0.8; }
+.sb-btn:not(.active) .sb-count { background: var(--border); color: var(--text-muted); opacity: 1; }
+.sb-btn .sb-ic { font-size: 14px; line-height: 1; flex-shrink: 0; width: 18px; text-align: center; }
+.new-folder-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 8px 10px; border: 1.5px dashed var(--border); border-radius: var(--radius-xs); background: none; font-family: var(--font); font-size: 12.5px; color: var(--text-light); cursor: pointer; transition: all 0.14s; margin-top: 4px; }
+.new-folder-btn:hover { border-color: var(--text-muted); color: var(--text-muted); background: var(--border-light); }
+
+.sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 149; backdrop-filter: blur(2px); }
+.sb-overlay.open { display: block; }
+
+/* ── MAIN ── */
+.main { flex: 1; margin-left: var(--sidebar-w); padding: 28px 28px 40px; min-width: 0; }
+
+/* ── PAGE HEADER ── */
+.page-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+.page-title { font-family: var(--font-serif); font-size: 26px; font-weight: 600; letter-spacing: -0.4px; line-height: 1.2; }
+.page-sub { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+.btn-add { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; background: var(--text); color: #fff; border: none; border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity 0.14s; flex-shrink: 0; }
+.btn-add:hover { opacity: 0.82; }
+.btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: none; color: var(--text); border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.14s; }
+.btn-outline:hover { border-color: var(--text); background: var(--border-light); }
+
+.btn-sm { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1px solid var(--border); border-radius: var(--radius-xs); background: none; font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.12s; }
+.btn-sm:hover { background: var(--border-light); color: var(--text); }
+.btn-sm.danger:hover { background: #fef2f2; color: #c0392b; border-color: #fca5a5; }
+
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 18px 20px; }
+.stat-num { font-family: var(--font-serif); font-size: 30px; font-weight: 600; letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
+.stat-lbl { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+
+/* ── SEARCH ── */
+.search-wrap { display: flex; align-items: center; gap: 9px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 14px; margin-bottom: 22px; transition: border-color 0.15s; }
+.search-wrap:focus-within { border-color: var(--text); }
+.search-wrap input { flex: 1; border: none; background: none; font-family: var(--font); font-size: 14px; color: var(--text); outline: none; }
+.search-wrap input::placeholder { color: var(--text-light); }
+
+/* ── SECTION HEADER ── */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sec-title { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); }
+
+/* ── FOLDER GRID ── */
+.folders-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 14px; }
+.folder-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s, border-color 0.2s; }
+.folder-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); border-color: var(--border); }
+.folder-accent { height: 3px; background: var(--text); transform: scaleX(0); transform-origin: left; transition: transform 0.22s ease; }
+.folder-card:hover .folder-accent { transform: scaleX(1); }
+.folder-card-body { padding: 16px 18px 18px; }
+.folder-thumb { width: 100%; height: 96px; object-fit: cover; display: block; border-bottom: 1px solid var(--border-light); }
+.folder-thumb-ph { height: 64px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 28px; border-bottom: 1px solid var(--border-light); }
+.folder-name { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 4px; }
+.folder-desc { font-size: 12.5px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+.folder-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-light); }
+.folder-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.f-badge { padding: 2px 8px; border-radius: 20px; background: var(--border-light); font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+/* ── BREADCRUMB ── */
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-muted); margin-bottom: 18px; flex-wrap: wrap; }
+.breadcrumb a { color: var(--text-muted); cursor: pointer; text-decoration: none; }
+.breadcrumb a:hover { color: var(--text); text-decoration: underline; }
+.breadcrumb .sep { color: var(--text-light); }
+.breadcrumb .cur { color: var(--text); font-weight: 600; }
+
+/* ── FOLDER DETAIL HEADER ── */
+.fv-hdr { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+.fv-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--surface2); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.fv-meta { flex: 1; min-width: 160px; }
+.fv-name { font-family: var(--font-serif); font-size: 24px; font-weight: 600; letter-spacing: -0.3px; }
+.fv-desc { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+.fv-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* ── FILTER CHIPS ── */
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.chip { padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: none; font-family: var(--font); font-size: 12.5px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: all 0.12s; }
+.chip:hover:not(.active) { background: var(--border-light); }
+.chip.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ── ENTRIES ── */
+.entries-list { display: flex; flex-direction: column; gap: 8px; }
+.entry-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-sm); overflow: hidden; transition: border-color 0.15s, box-shadow 0.15s; }
+.entry-card:hover { border-color: var(--border); box-shadow: var(--shadow-sm); }
+.entry-main { padding: 14px 16px 12px; }
+.entry-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.type-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+.type-pill.url { background: var(--tag-url-bg); color: var(--tag-url-fg); }
+.type-pill.note { background: var(--tag-note-bg); color: var(--tag-note-fg); }
+.type-pill.task { background: var(--tag-task-bg); color: var(--tag-task-fg); }
+.type-pill.reminder { background: var(--tag-rem-bg); color: var(--tag-rem-fg); }
+.entry-title { font-size: 14px; font-weight: 700; flex: 1; letter-spacing: -0.1px; min-width: 0; word-break: break-word; }
+.entry-body { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; word-break: break-word; white-space: pre-wrap; }
+.entry-url-link { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tag-url-fg); background: var(--tag-url-bg); padding: 4px 10px; border-radius: 5px; text-decoration: none; word-break: break-all; margin-bottom: 8px; max-width: 100%; }
+.entry-url-link:hover { text-decoration: underline; }
+.entry-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.entry-meta { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-light); }
+.entry-actions { display: flex; gap: 5px; }
+
+/* ── COMMENTS ── */
+.comments-panel { background: var(--surface2); border-top: 1px solid var(--border-light); padding: 12px 16px; }
+.cmt-item { display: flex; gap: 8px; margin-bottom: 10px; }
+.cmt-av { width: 22px; height: 22px; border-radius: 50%; background: var(--text); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.cmt-author { font-size: 11.5px; font-weight: 700; color: var(--text); }
+.cmt-time { font-size: 10.5px; color: var(--text-light); margin-left: 5px; }
+.cmt-text { font-size: 12.5px; color: var(--text-muted); line-height: 1.45; }
+.cmt-input-row { display: flex; gap: 6px; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-light); }
+.cmt-input { flex: 1; padding: 7px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-xs); font-family: var(--font); font-size: 13px; background: var(--surface); color: var(--text); outline: none; transition: border-color 0.14s; }
+.cmt-input:focus { border-color: var(--text); }
+
+/* ── TWO COL / PANEL ── */
+.two-col { display: grid; grid-template-columns: 1fr 288px; gap: 20px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 18px; }
+.panel-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.info-row .ir { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.info-row .ir:last-child { border-bottom: none; }
+.info-row .ir-label { color: var(--text-muted); font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.info-row .ir-val { font-weight: 600; color: var(--text); font-size: 13px; }
+
+/* ── IMAGE STRIP ── */
+.img-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.img-thumb-wrap { cursor: pointer; }
+.img-thumb { height: 72px; width: auto; max-width: 120px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-light); display: block; transition: opacity 0.15s; }
+.img-thumb:hover { opacity: 0.82; }
+.img-thumb-cap { font-size: 10px; color: var(--text-muted); margin-top: 3px; max-width: 120px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ── ACTIVITY ── */
+.act-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border-light); }
+.act-item:last-child { border-bottom: none; }
+.act-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; margin-top: 5px; }
+.act-text { font-size: 13px; color: var(--text-muted); }
+.act-text strong { color: var(--text); font-weight: 700; }
+.act-time { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.contrib-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.contrib-row:last-child { border-bottom: none; }
+.contrib-name { font-size: 13px; font-weight: 600; }
+.contrib-meta { font-size: 11px; color: var(--text-muted); }
+
+/* ── EMPTY STATE ── */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 24px; text-align: center; }
+.empty .ei { font-size: 36px; margin-bottom: 14px; opacity: 0.35; }
+.empty .et { font-size: 15px; font-weight: 700; margin-bottom: 5px; }
+.empty .es { font-size: 12.5px; color: var(--text-muted); }
+
+/* ── MODAL ── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(10,10,10,0.3); backdrop-filter: blur(6px); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--surface); border-radius: 18px; padding: 28px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: mpop 0.18s ease; }
+@keyframes mpop { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity:1; transform:none; } }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-title { font-family: var(--font-serif); font-size: 19px; font-weight: 600; letter-spacing: -0.2px; }
+.modal-footer { margin-top: 20px; }
+
+/* ── UPLOAD ── */
+.upload-zone { border: 2px dashed var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.14s, background 0.14s; }
+.upload-zone:hover { border-color: var(--text-muted); background: var(--surface2); }
+.upload-zone p { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+.upload-prev { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--text); color: #fff; padding: 9px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.22s, transform 0.22s; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 58px; background: rgba(255,255,255,0.97); backdrop-filter: blur(14px); border-top: 1px solid var(--border-light); z-index: 200; padding: 0 4px; align-items: center; justify-content: space-around; }
+.bn-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 14px; border-radius: 10px; cursor: pointer; color: var(--text-light); font-size: 9.5px; font-weight: 600; letter-spacing: 0.3px; border: none; background: none; transition: color 0.12s; text-transform: uppercase; font-family: var(--font); }
+.bn-item.active { color: var(--text); }
+.bn-item svg { width: 19px; height: 19px; }
+.bn-add { width: 42px; height: 42px; border-radius: 12px; background: var(--text); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transition: opacity 0.14s; flex-shrink: 0; }
+.bn-add:hover { opacity: 0.82; }
+
+/* ── VIEWS ── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── SPINNER ── */
+.spin-wrap { display: flex; align-items: center; justify-content: center; padding: 40px; }
+.spinner { width: 26px; height: 26px; border: 2.5px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .main { margin-left: 0; padding: 16px 16px 76px; }
+  .bottom-nav { display: flex; }
+  .hamburger { display: flex !important; }
+  .nav-email { display: none; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .folders-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 560px) {
+  .folders-grid { grid-template-columns: 1fr; }
+  .auth-card { padding: 32px 22px; }
+  .modal { padding: 22px 18px; }
+  .page-title { font-size: 22px; }
+  .fv-hdr { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ AUTH ══ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logos">
+      <img src="https://res.cloudinary.com/dpymwa41m/image/upload/v1771358511/company-logos/v8bob4kokxgesbtv6ehv.jpg" alt="Imfuyo">
+      <div class="auth-logo-sep"></div>
+      <img src="https://res.cloudinary.com/dpymwa41m/image/upload/v1762274479/Gemini_Generated_Image_q2kbiiq2kbiiq2kb-removebg-preview_zw2pnk.png" alt="Ceres">
+    </div>
+    <h1 class="auth-title">Project Ceres</h1>
+    <p class="auth-sub">Company vault — team access only</p>
+    <div class="ff"><label>Email</label><input type="email" id="a-email" placeholder="you@imfuyo.com" autocomplete="email"></div>
+    <div class="ff"><label>Password</label><input type="password" id="a-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="btn-primary" id="login-btn">Sign in to Vault</button>
+    <p class="auth-error" id="auth-err"></p>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <nav class="topnav">
+    <div class="nav-left">
+      <button class="icon-btn hamburger" id="hamburger-btn">
+        <svg width="15" height="12" viewBox="0 0 15 12" fill="none"><rect width="15" height="1.5" rx=".75" fill="currentColor"/><rect y="5.25" width="15" height="1.5" rx=".75" fill="currentColor"/><rect y="10.5" width="15" height="1.5" rx=".75" fill="currentColor"/></svg>
+      </button>
+      <div class="nav-logos">
+        <img src="https://res.cloudinary.com/dpymwa41m/image/upload/v1771358511/company-logos/v8bob4kokxgesbtv6ehv.jpg" alt="Imfuyo">
+        <div class="nav-sep"></div>
+        <img src="https://res.cloudinary.com/dpymwa41m/image/upload/v1762274479/Gemini_Generated_Image_q2kbiiq2kbiiq2kb-removebg-preview_zw2pnk.png" alt="Ceres">
+      </div>
+      <span class="nav-brand">Project Ceres</span>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user">
+        <div class="avatar" id="nav-av">–</div>
+        <span class="nav-email" id="nav-email"></span>
+      </div>
+      <button class="icon-btn" id="logout-btn" title="Sign out">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="sb-overlay" id="sb-overlay"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-group">
+        <div class="sb-group-label">Navigate</div>
+        <button class="sb-btn active" data-view="home"><span class="sb-ic">⊞</span> Overview</button>
+        <button class="sb-btn" data-view="activity"><span class="sb-ic">◎</span> Activity</button>
+      </div>
+      <div class="sb-group">
+        <div class="sb-group-label">Folders</div>
+        <div id="sb-folders"></div>
+        <button class="new-folder-btn" id="sb-new-folder">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Folder
+        </button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- HOME VIEW -->
+      <div class="view active" id="home-view">
+        <div class="page-hdr">
+          <div><h1 class="page-title" id="greeting">Good morning</h1><p class="page-sub">Your company knowledge vault</p></div>
+          <button class="btn-add" id="hv-new-folder"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Folder</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="st-folders">–</div><div class="stat-lbl">Folders</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-entries">–</div><div class="stat-lbl">Entries</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-urls">–</div><div class="stat-lbl">URLs</div></div>
+          <div class="stat-card"><div class="stat-num" id="st-team">–</div><div class="stat-lbl">Team</div></div>
+        </div>
+        <div class="search-wrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-light);flex-shrink:0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="search-input" placeholder="Search folders…">
+        </div>
+        <div class="sec-hdr"><span class="sec-title">All Folders</span></div>
+        <div class="folders-grid" id="folders-grid"><div class="spin-wrap" style="grid-column:1/-1"><div class="spinner"></div></div></div>
+      </div>
+
+      <!-- FOLDER VIEW -->
+      <div class="view" id="folder-view">
+        <div class="breadcrumb"><a id="bc-home">Overview</a><span class="sep">›</span><span class="cur" id="bc-folder">–</span></div>
+        <div class="fv-hdr">
+          <div class="fv-icon" id="fv-icon">📁</div>
+          <div class="fv-meta"><div class="fv-name" id="fv-name">–</div><div class="fv-desc" id="fv-desc">–</div></div>
+          <div class="fv-actions">
+            <button class="btn-outline" id="fv-img-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Add Image</button>
+            <button class="btn-add" id="fv-add-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Entry</button>
+          </div>
+        </div>
+        <div class="img-strip" id="fv-images"></div>
+        <div class="two-col">
+          <div>
+            <div class="filter-bar" id="entry-filters">
+              <button class="chip active" data-filter="all">All</button>
+              <button class="chip" data-filter="url">🔗 URLs</button>
+              <button class="chip" data-filter="note">📝 Notes</button>
+              <button class="chip" data-filter="task">✅ Tasks</button>
+              <button class="chip" data-filter="reminder">🔔 Reminders</button>
+            </div>
+            <div class="entries-list" id="entries-list"><div class="spin-wrap"><div class="spinner"></div></div></div>
+          </div>
+          <div>
+            <div class="panel"><div class="panel-title">Folder Info</div><div class="info-row" id="fv-info"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY VIEW -->
+      <div class="view" id="activity-view">
+        <div class="page-hdr"><div><h1 class="page-title">Activity</h1><p class="page-sub">What your team has been doing</p></div></div>
+        <div class="two-col">
+          <div class="panel"><div class="panel-title">Recent Activity</div><div id="activity-list"><div class="spin-wrap"><div class="spinner"></div></div></div></div>
+          <div class="panel"><div class="panel-title">Contributors</div><div id="contributors-list"><div class="spin-wrap"><div class="spinner"></div></div></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="bn-item active" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="bn-item" id="bn-folders-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Folders</button>
+    <button class="bn-add" id="bn-add"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="bn-item" data-view="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Activity</button>
+    <button class="bn-item" id="bn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Out</button>
+  </nav>
+</div>
+
+<!-- ══ MODAL: FOLDER ══ -->
+<div class="modal-backdrop" id="modal-folder">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">New Folder</span><button class="icon-btn" onclick="closeModal('modal-folder')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="ff"><label>Emoji Icon</label><input type="text" id="fm-icon" placeholder="📁" maxlength="2" style="max-width:64px;text-align:center;font-size:20px;"></div>
+    <div class="ff"><label>Name <span style="color:#c0392b">*</span></label><input type="text" id="fm-name" placeholder="e.g. Website Redesign, Q3 Campaign…"></div>
+    <div class="ff"><label>Description</label><textarea id="fm-desc" placeholder="What is this folder about?" rows="3"></textarea></div>
+    <div class="modal-footer"><button class="btn-primary" id="fm-submit">Create Folder</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ENTRY ══ -->
+<div class="modal-backdrop" id="modal-entry">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">Add Entry</span><button class="icon-btn" onclick="closeModal('modal-entry')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="ff"><label>Folder <span style="color:#c0392b">*</span></label><select id="em-folder"></select></div>
+    <div class="ff"><label>Type</label><select id="em-type"><option value="url">🔗 URL / Link</option><option value="note">📝 Note</option><option value="task">✅ Task</option><option value="reminder">🔔 Reminder</option></select></div>
+    <div class="ff"><label>Title <span style="color:#c0392b">*</span></label><input type="text" id="em-title" placeholder="Short descriptive label"></div>
+    <div class="ff" id="em-url-row"><label>URL <span style="color:#c0392b">*</span></label><input type="url" id="em-url" placeholder="https://…"></div>
+    <div class="ff"><label>Notes / Description</label><textarea id="em-body" placeholder="Any extra context, instructions or details…" rows="3"></textarea></div>
+    <div class="modal-footer"><button class="btn-primary" id="em-submit">Add to Vault</button></div>
+  </div>
+</div>
+
+<!-- ══ MODAL: IMAGE ══ -->
+<div class="modal-backdrop" id="modal-image">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title">Upload Image</span><button class="icon-btn" onclick="closeModal('modal-image')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="ff">
+      <label>Image File</label>
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('img-file').click()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-light);margin:0 auto;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <p>Click to choose an image</p>
+      </div>
+      <input type="file" id="img-file" accept="image/*" style="display:none;">
+      <img id="img-preview" class="upload-prev">
+    </div>
+    <div class="ff"><label>Caption (optional)</label><input type="text" id="img-caption" placeholder="Describe this image…"></div>
+    <div class="modal-footer"><button class="btn-primary" id="img-submit">Upload Image</button></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+                                   from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+  onSnapshot, serverTimestamp, query, orderBy, getDoc, setDoc, getDocs, increment
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+                                   from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
+
+// ─── INIT ──────────────────────────────────────────────────────────
+const mainApp = initializeApp({
+  apiKey: "AIzaSyD5JrVpTxgKohbO-zazuTdUQgEHMgNEMpg",
+  authDomain: "ceres-libs.firebaseapp.com", projectId: "ceres-libs",
+  storageBucket: "ceres-libs.firebasestorage.app", messagingSenderId: "573140683429",
+  appId: "1:573140683429:web:fbaf34e603cf4a137e5b4c"
+}, 'main');
+
+const storeApp = initializeApp({
+  apiKey: "AIzaSyAiRNS2NaZnCNOZ3r948mhsciu7f-xTkXc",
+  authDomain: "autostore-58181.firebaseapp.com", projectId: "autostore-58181",
+  storageBucket: "autostore-58181.firebasestorage.app", messagingSenderId: "208074075097",
+  appId: "1:208074075097:web:4dea4c511813cde7df47c8"
+}, 'store');
+
+const auth    = getAuth(mainApp);
+const db      = getFirestore(mainApp);
+const storage = getStorage(storeApp);
+
+// ─── STATE ─────────────────────────────────────────────────────────
+let user        = null;
+let folders     = [];
+let entries     = [];
+let entryFilter = 'all';
+let currentFid  = null;
+let unsubEntries  = null;
+let unsubFolders  = null;
+let unsubActivity = null;
+
+// ─── UTILS ─────────────────────────────────────────────────────────
+const esc = s => s ? String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+
+const typeLabel = t => ({url:'🔗 URL', note:'📝 Note', task:'✅ Task', reminder:'🔔 Reminder'}[t]||'🔗');
+
+function timeAgo(d) {
+  const s = Math.floor((Date.now()-d)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return `${Math.floor(s/60)}m ago`;
+  if(s<86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+window.openModal  = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+
+document.querySelectorAll('.modal-backdrop').forEach(el =>
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); })
+);
+
+// ─── GREETING ──────────────────────────────────────────────────────
+const h = new Date().getHours();
+document.getElementById('greeting').textContent =
+  h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+
+// ─── AUTH ──────────────────────────────────────────────────────────
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  const errEl = document.getElementById('auth-err');
+  const btn   = document.getElementById('login-btn');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Please fill in both fields.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    errEl.textContent = 'Invalid email or password. Please try again.';
+    btn.disabled = false; btn.textContent = 'Sign in to Vault';
+  }
+});
+document.getElementById('a-pass').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-btn').click(); });
+document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+document.getElementById('bn-logout').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, async u => {
+  if (u) {
+    user = u;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    const name = u.email.split('@')[0];
+    document.getElementById('nav-av').textContent    = name.charAt(0).toUpperCase();
+    document.getElementById('nav-email').textContent = u.email;
+    try {
+      await setDoc(doc(db,'contributors',u.uid), {
+        email:u.email, displayName:name,
+        lastSeen:serverTimestamp(), loginCount:increment(1)
+      }, {merge:true});
+    } catch {}
+    startFolderListener();
+  } else {
+    user = null;
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-btn').disabled = false;
+    document.getElementById('login-btn').textContent = 'Sign in to Vault';
+    if(unsubFolders)  { unsubFolders();  unsubFolders  = null; }
+    if(unsubEntries)  { unsubEntries();  unsubEntries  = null; }
+    if(unsubActivity) { unsubActivity(); unsubActivity = null; }
+  }
+});
+
+// ─── FOLDER REAL-TIME LISTENER ─────────────────────────────────────
+function startFolderListener() {
+  const q = query(collection(db,'folders'), orderBy('createdAt','desc'));
+  unsubFolders = onSnapshot(q, snap => {
+    folders = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderFolders();
+    renderSidebar();
+    updateStats();
+    // if a folder is currently open, refresh its images/info in case it changed
+    if(currentFid) {
+      const f = folders.find(x => x.id === currentFid);
+      if(f) refreshFolderHeader(f);
+    }
+  }, err => console.error('folders listener:', err));
+}
+
+function updateStats() {
+  document.getElementById('st-folders').textContent = folders.length;
+  document.getElementById('st-entries').textContent = folders.reduce((a,f)=>a+(f.entryCount||0),0);
+  document.getElementById('st-urls').textContent    = folders.reduce((a,f)=>a+(f.urlCount||0),0);
+  getDocs(collection(db,'contributors'))
+    .then(s => document.getElementById('st-team').textContent = s.size)
+    .catch(()=>{});
+}
+
+// ─── RENDER FOLDERS ────────────────────────────────────────────────
+function renderFolders() {
+  const grid   = document.getElementById('folders-grid');
+  const search = document.getElementById('search-input').value.toLowerCase();
+  const filtered = folders.filter(f =>
+    (f.name||'').toLowerCase().includes(search) ||
+    (f.desc||'').toLowerCase().includes(search)
+  );
+  if(!filtered.length) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ei">📁</div><div class="et">No folders yet</div><div class="es">Create your first folder to start building the vault.</div></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(f => `
+    <div class="folder-card" onclick="openFolder('${f.id}')">
+      <div class="folder-accent"></div>
+      ${f.coverImage
+        ? `<img src="${esc(f.coverImage)}" class="folder-thumb" loading="lazy" onerror="this.style.display='none'">`
+        : `<div class="folder-thumb-ph">${f.icon||'📁'}</div>`}
+      <div class="folder-card-body">
+        <div class="folder-name">${esc(f.name)}</div>
+        <div class="folder-desc">${f.desc ? esc(f.desc) : '<span style="color:var(--text-light);font-style:italic;">No description</span>'}</div>
+        <div class="folder-footer">
+          <div class="folder-badges">
+            <span class="f-badge">${f.entryCount||0} entries</span>
+            ${(f.urlCount||0)>0?`<span class="f-badge">${f.urlCount} URLs</span>`:''}
+          </div>
+          <span style="color:var(--text-light);font-size:11px;">${esc(f.createdBy||'')}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSidebar() {
+  document.getElementById('sb-folders').innerHTML = folders.map(f => `
+    <button class="sb-btn ${currentFid===f.id?'active':''}" onclick="openFolder('${f.id}')">
+      <span class="sb-ic">${f.icon||'📁'}</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(f.name)}</span>
+      <span class="sb-count">${f.entryCount||0}</span>
+    </button>
+  `).join('');
+}
+
+document.getElementById('search-input').addEventListener('input', renderFolders);
+
+// ─── OPEN FOLDER ───────────────────────────────────────────────────
+window.openFolder = function(fid) {
+  const folder = folders.find(f => f.id === fid);
+  if(!folder) return;
+  currentFid = fid;
+
+  refreshFolderHeader(folder);
+  switchView('folder', null);
+  renderSidebar();
+
+  // restart entries listener
+  if(unsubEntries) unsubEntries();
+  document.getElementById('entries-list').innerHTML = '<div class="spin-wrap"><div class="spinner"></div></div>';
+  entryFilter = 'all';
+  document.querySelectorAll('#entry-filters .chip').forEach(c => c.classList.toggle('active', c.dataset.filter==='all'));
+
+  const eq = query(collection(db,'folders',fid,'entries'), orderBy('createdAt','desc'));
+  unsubEntries = onSnapshot(eq, snap => {
+    entries = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderEntries();
+  }, err => console.error('entries listener:', err));
+};
+
+function refreshFolderHeader(folder) {
+  document.getElementById('bc-folder').textContent = folder.name;
+  document.getElementById('fv-icon').textContent   = folder.icon||'📁';
+  document.getElementById('fv-name').textContent   = folder.name;
+  document.getElementById('fv-desc').textContent   = folder.desc||'No description';
+
+  const created = folder.createdAt?.toDate
+    ? folder.createdAt.toDate().toLocaleDateString('en-ZA',{year:'numeric',month:'short',day:'numeric'})
+    : 'Recently';
+  document.getElementById('fv-info').innerHTML = `
+    <div class="ir"><span class="ir-label">Created by</span><span class="ir-val">${esc(folder.createdBy||'–')}</span></div>
+    <div class="ir"><span class="ir-label">Date</span><span class="ir-val">${created}</span></div>
+    <div class="ir"><span class="ir-label">Entries</span><span class="ir-val">${folder.entryCount||0}</span></div>
+    <div class="ir"><span class="ir-label">URLs</span><span class="ir-val">${folder.urlCount||0}</span></div>
+    <div class="ir"><span class="ir-label">Images</span><span class="ir-val">${(folder.images||[]).length}</span></div>
+  `;
+  renderFolderImages(folder);
+}
+
+function renderFolderImages(folder) {
+  const strip = document.getElementById('fv-images');
+  if(!folder.images?.length) { strip.innerHTML=''; return; }
+  strip.innerHTML = folder.images.map((img,i) => `
+    <div class="img-thumb-wrap">
+      <img src="${esc(img.url)}" class="img-thumb" loading="lazy"
+        onclick="window.open('${esc(img.url)}','_blank')"
+        onerror="this.parentElement.style.display='none'">
+      ${img.caption?`<div class="img-thumb-cap">${esc(img.caption)}</div>`:''}
+    </div>
+  `).join('');
+}
+
+// ─── RENDER ENTRIES ────────────────────────────────────────────────
+function renderEntries() {
+  const list = document.getElementById('entries-list');
+  let filtered = entryFilter==='all' ? entries : entries.filter(e=>e.type===entryFilter);
+  if(!filtered.length) {
+    const icon = {url:'🔗',note:'📝',task:'✅',reminder:'🔔',all:'✨'}[entryFilter]||'✨';
+    list.innerHTML = `<div class="empty"><div class="ei">${icon}</div><div class="et">Nothing here yet</div><div class="es">Add your first ${entryFilter==='all'?'entry':entryFilter} to this folder.</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(e => `
+    <div class="entry-card" id="ec-${e.id}">
+      <div class="entry-main">
+        <div class="entry-top">
+          <span class="type-pill ${e.type||'url'}">${typeLabel(e.type)}</span>
+          <span class="entry-title">${esc(e.title)}</span>
+        </div>
+        ${e.body?`<div class="entry-body">${esc(e.body)}</div>`:''}
+        ${e.url?`<a class="entry-url-link" href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          ${esc(e.url)}
+        </a>`:''}
+        <div class="entry-foot">
+          <div class="entry-meta">
+            <div class="avatar" style="width:18px;height:18px;font-size:8px;">${(e.createdBy||'?').charAt(0).toUpperCase()}</div>
+            ${esc(e.createdBy||'Unknown')} <span>·</span> ${e.createdAt?.toDate?timeAgo(e.createdAt.toDate()):'just now'}
+          </div>
+          <div class="entry-actions">
+            <button class="btn-sm" onclick="toggleComments('${e.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              ${e.commentCount||0}
+            </button>
+            <button class="btn-sm danger" onclick="deleteEntry('${e.id}')">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="cp-${e.id}" style="display:none;"></div>
+    </div>
+  `).join('');
+}
+
+// ─── ENTRY FILTER CHIPS ────────────────────────────────────────────
+document.getElementById('entry-filters').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  entryFilter = chip.dataset.filter;
+  document.querySelectorAll('#entry-filters .chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  renderEntries();
+});
+
+// ─── COMMENTS ──────────────────────────────────────────────────────
+const cmtOpen = {};
+
+window.toggleComments = async function(eid) {
+  const panel = document.getElementById(`cp-${eid}`);
+  if(cmtOpen[eid]) {
+    panel.style.display='none'; cmtOpen[eid]=false;
+  } else {
+    panel.style.display='block'; cmtOpen[eid]=true;
+    loadComments(eid, panel);
+  }
+};
+
+async function loadComments(eid, panel) {
+  panel.innerHTML = '<div class="spin-wrap" style="padding:12px;"><div class="spinner"></div></div>';
+  try {
+    const q = query(collection(db,'folders',currentFid,'entries',eid,'comments'), orderBy('createdAt','asc'));
+    const snap = await getDocs(q);
+    const comments = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderCommentPanel(eid, panel, comments);
+  } catch {
+    panel.innerHTML = '<div class="comments-panel"><p style="font-size:12px;color:#c0392b;">Error loading comments.</p></div>';
+  }
+}
+
+function renderCommentPanel(eid, panel, comments) {
+  panel.className = 'comments-panel';
+  panel.innerHTML = `
+    ${comments.length
+      ? comments.map(c=>`
+        <div class="cmt-item">
+          <div class="cmt-av">${(c.author||'?').charAt(0).toUpperCase()}</div>
+          <div>
+            <span class="cmt-author">${esc(c.author)}</span>
+            <span class="cmt-time">${c.createdAt?.toDate?timeAgo(c.createdAt.toDate()):'just now'}</span>
+            <div class="cmt-text">${esc(c.text)}</div>
+          </div>
+        </div>`).join('')
+      : '<p style="font-size:12px;color:var(--text-light);margin-bottom:8px;">No comments yet — be the first!</p>'
+    }
+    <div class="cmt-input-row">
+      <input class="cmt-input" id="ci-${eid}" placeholder="Write a comment…">
+      <button class="btn-sm" onclick="submitComment('${eid}')">Post</button>
+    </div>`;
+  document.getElementById(`ci-${eid}`)?.addEventListener('keydown', e => {
+    if(e.key==='Enter') submitComment(eid);
+  });
+}
+
+window.submitComment = async function(eid) {
+  const input = document.getElementById(`ci-${eid}`);
+  const text = input?.value?.trim();
+  if(!text) return;
+  input.value = '';
+  try {
+    await addDoc(collection(db,'folders',currentFid,'entries',eid,'comments'), {
+      text, author:user.email.split('@')[0], createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,'folders',currentFid,'entries',eid), {commentCount:increment(1)});
+    const panel = document.getElementById(`cp-${eid}`);
+    loadComments(eid, panel);
+    toast('Comment posted');
+  } catch { toast('Error posting comment'); }
+};
+
+// ─── DELETE ENTRY ──────────────────────────────────────────────────
+window.deleteEntry = async function(eid) {
+  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  const e = entries.find(x=>x.id===eid);
+  try {
+    await deleteDoc(doc(db,'folders',currentFid,'entries',eid));
+    await updateDoc(doc(db,'folders',currentFid), {
+      entryCount: increment(-1),
+      urlCount: e?.type==='url' ? increment(-1) : increment(0)
+    });
+    await logActivity(`deleted "${e?.title||'an entry'}" from a folder`);
+    toast('Entry deleted');
+  } catch { toast('Error deleting entry'); }
+};
+
+// ─── CREATE FOLDER ─────────────────────────────────────────────────
+function openFolderModal() {
+  document.getElementById('fm-name').value = '';
+  document.getElementById('fm-desc').value = '';
+  document.getElementById('fm-icon').value = '';
+  openModal('modal-folder');
+  setTimeout(() => document.getElementById('fm-name').focus(), 100);
+}
+
+document.getElementById('fm-submit').addEventListener('click', async () => {
+  const name = document.getElementById('fm-name').value.trim();
+  if(!name) { toast('Please enter a folder name'); return; }
+  const icon = document.getElementById('fm-icon').value.trim() || '📁';
+  const desc = document.getElementById('fm-desc').value.trim();
+  const btn  = document.getElementById('fm-submit');
+  btn.disabled=true; btn.textContent='Creating…';
+  try {
+    const ref = await addDoc(collection(db,'folders'), {
+      name, icon, desc, entryCount:0, urlCount:0, images:[],
+      createdBy:user.email.split('@')[0], createdAt:serverTimestamp()
+    });
+    await logActivity(`created folder "${name}"`);
+    closeModal('modal-folder');
+    toast('Folder created ✓');
+    // Open the new folder right away (it will appear in the snapshot too)
+    setTimeout(() => {
+      const newFolder = { id:ref.id, name, icon, desc, entryCount:0, urlCount:0, images:[], createdBy:user.email.split('@')[0] };
+      if(!folders.find(f=>f.id===ref.id)) folders.unshift(newFolder);
+      openFolder(ref.id);
+    }, 300);
+  } catch(err) { console.error(err); toast('Error creating folder'); }
+  btn.disabled=false; btn.textContent='Create Folder';
+});
+
+// ─── ADD ENTRY ─────────────────────────────────────────────────────
+function openEntryModal(presetFid) {
+  const sel = document.getElementById('em-folder');
+  sel.innerHTML = folders.map(f => `<option value="${f.id}">${f.icon||'📁'} ${esc(f.name)}</option>`).join('');
+  if(presetFid) sel.value = presetFid;
+  document.getElementById('em-type').value = 'url';
+  document.getElementById('em-url-row').style.display = 'block';
+  document.getElementById('em-title').value = '';
+  document.getElementById('em-url').value   = '';
+  document.getElementById('em-body').value  = '';
+  openModal('modal-entry');
+  setTimeout(() => document.getElementById('em-title').focus(), 100);
+}
+
+document.getElementById('em-type').addEventListener('change', () => {
+  const t = document.getElementById('em-type').value;
+  document.getElementById('em-url-row').style.display = t==='url'?'block':'none';
+});
+
+document.getElementById('em-submit').addEventListener('click', async () => {
+  const fid   = document.getElementById('em-folder').value;
+  const type  = document.getElementById('em-type').value;
+  const title = document.getElementById('em-title').value.trim();
+  const url   = document.getElementById('em-url').value.trim();
+  const body  = document.getElementById('em-body').value.trim();
+  if(!fid)   { toast('Please select a folder'); return; }
+  if(!title) { toast('Please enter a title'); return; }
+  if(type==='url' && !url) { toast('Please enter a URL'); return; }
+  const folder = folders.find(f=>f.id===fid);
+  const btn = document.getElementById('em-submit');
+  btn.disabled=true; btn.textContent='Adding…';
+  try {
+    await addDoc(collection(db,'folders',fid,'entries'), {
+      type, title, url:url||null, body:body||null,
+      createdBy:user.email.split('@')[0], commentCount:0, createdAt:serverTimestamp()
+    });
+    await updateDoc(doc(db,'folders',fid), {
+      entryCount: increment(1),
+      urlCount: type==='url' ? increment(1) : increment(0)
+    });
+    await logActivity(`added ${type} "${title}" to "${folder?.name||'a folder'}"`);
+    closeModal('modal-entry');
+    toast('Entry added ✓');
+    if(currentFid !== fid) openFolder(fid);
+  } catch(err) { console.error(err); toast('Error adding entry'); }
+  btn.disabled=false; btn.textContent='Add to Vault';
+});
+
+// ─── IMAGE UPLOAD ──────────────────────────────────────────────────
+document.getElementById('img-file').addEventListener('change', function() {
+  const file = this.files[0]; if(!file) return;
+  const prev = document.getElementById('img-preview');
+  prev.src = URL.createObjectURL(file); prev.style.display='block';
+});
+
+document.getElementById('img-submit').addEventListener('click', async () => {
+  if(!currentFid) { toast('Please open a folder first'); return; }
+  const file = document.getElementById('img-file').files[0];
+  if(!file) { toast('Please select an image'); return; }
+  const caption = document.getElementById('img-caption').value.trim();
+  const btn = document.getElementById('img-submit');
+  btn.disabled=true; btn.textContent='Uploading…';
+  try {
+    const storageRef = sRef(storage, `folders/${currentFid}/${Date.now()}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    const fSnap = await getDoc(doc(db,'folders',currentFid));
+    const imgs = fSnap.data()?.images || [];
+    imgs.push({ url, caption });
+    await updateDoc(doc(db,'folders',currentFid), { images:imgs, coverImage:imgs[0].url });
+    await logActivity(`uploaded an image to a folder`);
+    closeModal('modal-image');
+    document.getElementById('img-file').value = '';
+    document.getElementById('img-preview').style.display='none';
+    document.getElementById('img-caption').value='';
+    toast('Image uploaded ✓');
+    // Images update will come via folder onSnapshot too
+  } catch(err) { console.error(err); toast('Error: '+err.message); }
+  btn.disabled=false; btn.textContent='Upload Image';
+});
+
+// ─── ACTIVITY ──────────────────────────────────────────────────────
+function startActivityListener() {
+  if(unsubActivity) return;
+  const q = query(collection(db,'activity'), orderBy('createdAt','desc'));
+  unsubActivity = onSnapshot(q, snap => {
+    const log = snap.docs.slice(0,40).map(d=>d.data());
+    const el = document.getElementById('activity-list');
+    if(!log.length) {
+      el.innerHTML='<div class="empty" style="padding:24px 0;"><div class="ei">📋</div><div class="et">No activity yet</div></div>';
+    } else {
+      el.innerHTML = log.map(a=>`
+        <div class="act-item">
+          <div class="act-dot"></div>
+          <div>
+            <div class="act-text"><strong>${esc(a.actor)}</strong> ${esc(a.action)}</div>
+            <div class="act-time">${a.createdAt?.toDate?timeAgo(a.createdAt.toDate()):'recently'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  });
+}
+
+async function loadContributors() {
+  const el = document.getElementById('contributors-list');
+  try {
+    const snap = await getDocs(collection(db,'contributors'));
+    const c = snap.docs.map(d=>d.data());
+    if(!c.length) { el.innerHTML='<p style="font-size:12px;color:var(--text-muted);">No contributors yet.</p>'; return; }
+    el.innerHTML = c.map(x=>`
+      <div class="contrib-row">
+        <div class="avatar">${(x.displayName||x.email||'?').charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="contrib-name">${esc(x.displayName||x.email)}</div>
+          <div class="contrib-meta">${x.loginCount||1} logins · ${x.lastSeen?.toDate?timeAgo(x.lastSeen.toDate()):'recently'}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch { el.innerHTML='<p style="font-size:12px;color:#c0392b;">Error loading.</p>'; }
+}
+
+async function logActivity(action) {
+  try {
+    await addDoc(collection(db,'activity'), {
+      actor:user?.email?.split('@')[0]||'Someone', action, createdAt:serverTimestamp()
+    });
+  } catch {}
+}
+
+// ─── VIEW SWITCHING ────────────────────────────────────────────────
+function switchView(name, triggerEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(`${name}-view`).classList.add('active');
+  document.querySelectorAll('[data-view]').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll(`[data-view="${name}"]`).forEach(el => el.classList.add('active'));
+  closeSidebar();
+  if(name==='activity') { startActivityListener(); loadContributors(); }
+  if(name!=='folder') { currentFid=null; renderSidebar(); }
+}
+window.switchView = switchView;
+
+document.querySelectorAll('[data-view]').forEach(el => {
+  el.addEventListener('click', function() { const v=this.dataset.view; if(v) switchView(v,this); });
+});
+
+document.getElementById('bc-home').addEventListener('click', () => switchView('home',null));
+
+// ─── SIDEBAR ───────────────────────────────────────────────────────
+function openSidebar()  { document.getElementById('sidebar').classList.add('open'); document.getElementById('sb-overlay').classList.add('open'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sb-overlay').classList.remove('open'); }
+document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
+document.getElementById('sb-overlay').addEventListener('click', closeSidebar);
+document.getElementById('bn-folders-btn').addEventListener('click', openSidebar);
+
+// ─── BUTTON WIRING ─────────────────────────────────────────────────
+document.getElementById('sb-new-folder').addEventListener('click', openFolderModal);
+document.getElementById('hv-new-folder').addEventListener('click', openFolderModal);
+document.getElementById('fv-add-btn').addEventListener('click', () => openEntryModal(currentFid));
+document.getElementById('fv-img-btn').addEventListener('click', () => openModal('modal-image'));
+document.getElementById('bn-add').addEventListener('click', () => {
+  if(currentFid) openEntryModal(currentFid);
+  else openFolderModal();
+});
+</script>
+</body>
+</html>
